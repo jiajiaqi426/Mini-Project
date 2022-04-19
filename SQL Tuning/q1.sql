@@ -10,9 +10,18 @@ SET @v6 = 'MGT';
 SET @v7 = 'EE';			  
 SET @v8 = 'MAT';
 
--- CREATE INDEX index1 ON Student (id);
 -- 1. List the name of the student with id equal to v1 (id).
 EXPLAIN ANALYZE
 SELECT name FROM Student WHERE id = @v1;
-
-SHOW INDEXES FROM Student;
+/* '-> Filter: (student.id = <cache>((@v1)))  (cost=41.00 rows=40) (actual time=0.095..0.218 rows=1 loops=1)    
+-> Table scan on Student  (cost=41.00 rows=400) (actual time=0.058..0.200 rows=400 loops=1)
+*/
+/*
+The speed is low because the query use full table scan, the original table doesn't have any index.
+Solution: create primary index on uid
+*/
+ALTER TABLE Student ADD PRIMARY KEY (id);
+EXPLAIN analyze
+SELECT Student.name FROM Student WHERE id = @v1;
+/*'-> Rows fetched before execution  (cost=0.00..0.00 rows=1) (actual time=0.000..0.000 rows=1 loops=1)\n'
+*/
